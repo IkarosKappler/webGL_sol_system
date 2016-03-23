@@ -1,0 +1,288 @@
+/**
+ * Example for a basic THREE.js scene setup.
+ *
+ * Thanks to
+ *    http://planetpixelemporium.com/
+ * for the planet textures.
+ *
+ * 
+ * @author  Ikaros Kappler
+ * @date    2015-11-09
+ * @version 1.0.0
+ **/
+
+var EARTHPERIHELION = 356.356;
+
+function init() {
+
+    // instantiate a loader
+    var solarSystem = { size     : 25.0,			
+			children : [ { id : "mercury", label : "Mercury", size : 4480,   distance : 58000000,   perihelion : 115.88   },
+				     { id : "venus",   label : "Venus",   size : 12100,  distance : 108000000,  perihelion : 583.92   },
+				     { id : "earth",   label : "Earth",   size : 12700,  distance : 149600000,  perihelion : EARTHPERIHELION },
+				     { id : "mars",    label : "Mars",    size : 6792,   distance : 227990000,  perihelion : 779.94   },
+				     { id : "jupiter", label : "Jupiter", size : 142985, distance : 778300000,  perihelion : 398.88   },
+				     { id : "saturn",  label : "Saturn",  size : 129536, distance : 1433400000, perihelion : 378.09   },
+				     { id : "uranus",  label : "Uranus",  size : 51118,  distance : 2872400000, perihelion : 369.66   },
+				     { id : "neptune", label : "Neptune", size : 49528,  distance : 4495000000, perihelion : 367.49   },
+				     { id : "pluto",   label : "Puto",    size : 2374,   distance : 5906400000, perihelion : 366.73   }
+				   ]
+		      };
+    			
+    var	textures = { "mercury"   : { source : "img/mercurymap.jpg",    texture : null },
+		     "venus"     : { source : "img/venusmap.jpg",      texture : null },
+		     "earth"     : { source : "img/earthmap1k.jpg",    texture : null },  
+		     "eath.moon" : { source : "img/moonmap1k.jpg",     texture : null },
+		     "mars"      : { source : "img/mars_1k_color.jpg", texture : null },
+		     "jupiter"   : { source : "img/jupitermap.jpg",    texture : null },
+		     "saturn"    : { source : "img/saturnmap.jpg",     texture : null },
+		     "uranus"    : { source : "img/uranusmap.jpg",     texture : null },
+		     "neptune"   : { source : "img/neptunemap.jpg",    texture : null },
+		     "pluto"     : { source : "img/plutomap1k.jpg" ,   texture : null }
+		   };
+    for( k in textures ) {
+	textures[k].texture = THREE.ImageUtils.loadTexture( textures[k].source );
+    }
+    init_withTextures( solarSystem, textures );
+
+}
+
+function init_withTextures( solarSystem, textures ) {
+
+    // Create new scene
+    this.scene = new THREE.Scene(); 
+
+    // Create a camera to look through
+    this.camera = new THREE.PerspectiveCamera( 50,  // 75
+					       window.innerWidth/window.innerHeight, 
+					       0.1, 1000); 
+
+    // Initialize a new THREE renderer (you are also allowed 
+    // to pass an existing canvas for rendering).
+    this.renderer = new THREE.WebGLRenderer( { antialias : true } ); 
+    this.renderer.setSize( window.innerWidth, 
+			   window.innerHeight
+			 ); 
+    // ... and append it to the DOM
+    //renderer.domElement.
+    document.body.appendChild(renderer.domElement); 
+
+    // Build the celestial system
+    var origin         = new THREE.Vector3(0,0,0);
+    var distanceFactor = 0.00000003;
+    var sizeFactor     = 0.0001;
+    for( var k in solarSystem.children ) {
+	var entitySettings = solarSystem.children[k];
+	console.debug( "entitySettings=" + JSON.stringify(entitySettings) );
+	var radius   = (entitySettings.size/2.0) * sizeFactor;
+	var geometry = new THREE.SphereGeometry( radius,
+						 32,      // widthSegments 
+						 24       // heightSegments
+					       ); 
+
+	// Pick a material, something like MeshBasicMaterial, PhongMaterial, 
+	var material = new THREE.MeshLambertMaterial( { map: textures[entitySettings.id].texture } ); 
+	
+	// Create the cube from the geometry and the material ...
+	var item = new THREE.Mesh( geometry, material ); 
+	item.metaData = entitySettings;
+	item.metaData.radius = radius;
+	item.isCelestialBody    = true;
+	item.position.x += origin.x;
+	item.position.y += origin.y;
+	item.position.z += origin.z + entitySettings.distance*distanceFactor;
+	// ... and add it to your scene.
+	this.scene.add( item ); 
+
+	// Add text sprite
+	var nameSprite = makeTextSprite( " " + entitySettings.label + " ", 
+					 { fontsize: 32, fontface: "Courier", borderColor: null } ); //{r:0, g:0, b:255, a:1.0} } );
+	nameSprite.position.set( origin.x, origin.y, origin.z + entitySettings.distance*distanceFactor );
+	//this.scene.add( nameSprite );
+	item.children.push( nameSprite );
+	item.nameSprite = nameSprite;
+
+	// Add orbit line
+	var orbitGeometry = new IKRS.OrbitGeometry( entitySettings.distance*distanceFactor, 100 );
+	var lineMaterial  = new THREE.LineBasicMaterial( { color    : 0x0088f8, transparent : true, opacity : 0.5, linewidth : 1.0 });
+	var orbit = new THREE.Line( orbitGeometry, lineMaterial );
+	//orbit.rotation.x = Math.PI / 2;
+	//circle.position.y = cylinderParam.trackHeight+20;
+	this.scene.add( orbit );
+    }
+
+    
+    // Add sun sprite at center
+    var map           = new THREE.TextureLoader().load( "img/sprite_sun.png" );
+    var material      = new THREE.SpriteMaterial( { map: map, color: 0xffffff, fog: false } );
+    var sunSprite     = new THREE.Sprite( material );
+    sunSprite.position.set( 0, 0, 0 );
+    scene.add( sunSprite );
+    var sunNameSprite = makeTextSprite( " Sol ", 
+					{ fontsize: 32, fontface: "Courier", borderColor: null } ); //{r:0, g:0, b:255, a:1.0} } );
+    sunNameSprite.position.set( 0, 0, 0 );
+    scene.add( sunNameSprite );
+
+
+
+    // Add some light
+    this.pointLight = new THREE.PointLight(0xFFFFFF);
+    //this.pointLight = new THREE.AmbientLight(0xFFFFFF);
+
+    // set its position
+    this.pointLight.position.x = 0; // 10;
+    this.pointLight.position.y = 0; // 50;
+    this.pointLight.position.z = 0; // 130;
+
+    // add to the scene
+    this.scene.add( this.pointLight );
+
+
+    // Add grid helper
+    
+    var gridHelper = new THREE.GridHelper( 90, 9 );
+    //gridHelper.colorGrid = 0x292929;
+    gridHelper.setColors( 0x303030, 0x282828 );
+    
+    this.scene.add( gridHelper );
+    
+
+    // Add an axis helper
+    //var ah                  = new THREE.AxisHelper(50);
+    //ah.position.y -= 0.1;  // The axis helper should not intefere with the grid helper
+    //this.scene.add( ah );
+
+
+    // Set the camera position
+    this.camera.position.set( 75, 75, 75 );
+    // And look at the cube again
+    this.camera.lookAt( new THREE.Vector3(0,0,0) ); //cube.position );
+
+
+    // Finally we want to be able to rotate the whole scene with the mouse: 
+    // add an orbit control helper.
+    var _self = this;
+    this.orbitControls = new THREE.OrbitControls( this.camera, this.renderer.domElement ); 
+    // Always move the point light with the camera. Looks much better ;)
+    /*this.orbitControls.addEventListener( 'change', 
+					 function() { _self.pointLight.position.copy(_self.camera.position); } 
+				       ); 
+    */
+    this.orbitControls.enableDamping = true;
+    this.orbitControls.dampingFactor = 1.0;
+    this.orbitControls.enableZoom    = true;
+    this.orbitControls.target.copy( new THREE.Vector3(0,0,0) ); //cube.position );  
+
+
+
+    // This is the basic render function. It will be called perpetual, again and again,
+    // depending on your machines possible frame rate.
+    var perihelion      = 0.0;
+    var perihelionSteps = 25;
+    this._render = function () { 
+	// Pass the render function itself
+	requestAnimationFrame(this._render); 
+	
+	// Let's animate the cube: a rotation.
+	//cube.rotation.x += 0.05; 
+	//cube.rotation.y += 0.01; 
+	for( var i in this.scene.children ) {
+	    if( this.scene.children[i].isCelestialBody ) {
+		var item = this.scene.children[i];
+		// Rotate around itself
+		item.rotation.y += 0.01;
+
+		// Rotate around origin
+		var angle             = perihelion*Math.PI*2 * (1/perihelionSteps) * (item.metaData.perihelion/EARTHPERIHELION);
+		item.position.x       = Math.cos(angle) * item.metaData.distance * distanceFactor;
+		item.position.z       = Math.sin(angle) * item.metaData.distance * distanceFactor;
+
+		if( item.nameSprite ) {
+		    item.nameSprite.position.copy( item.position );
+		    item.nameSprite.position.y += item.metaData.radius;
+		    //console.debug( "spriteWidth=" + item.nameSprite.metaData.spriteWidth );
+		    //item.nameSprite.position.z += (item.nameSprite.metaData.spriteWidth/100)/2;
+		}
+	    }
+	}
+
+	this.renderer.render(this.scene, this.camera); 
+	perihelion += 1/perihelionSteps;
+    }; 
+    // Call the rendering function. This will cause and infinite recursion (we want 
+    // that here, because the animation shall run forever).
+    this._render(); 
+
+
+} // END function init_withTextire
+
+
+// https://stemkoski.github.io/Three.js/Sprite-Text-Labels.html
+function makeTextSprite( message, parameters ) {
+    if( parameters === undefined ) parameters = {};
+    
+    var fontface = parameters.hasOwnProperty("fontface") ? parameters["fontface"] : "Arial";    
+    var fontsize = parameters.hasOwnProperty("fontsize") ? parameters["fontsize"] : 18;    
+    var borderThickness = parameters.hasOwnProperty("borderThickness") ? parameters["borderThickness"] : 4;    
+    var borderColor = parameters.hasOwnProperty("borderColor") ? parameters["borderColor"] : { r:0, g:0, b:0, a:1.0 };    
+    var backgroundColor = parameters.hasOwnProperty("backgroundColor") ? parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };    
+    var color = parameters.hasOwnProperty("color") ? parameters["color"] : { r:255, g:255, b:255, a:1.0 };
+
+    //var spriteAlignment = 0; // THREE.SpriteAlignment.topLeft;
+    
+    var canvas        = document.createElement('canvas');
+    var context       = canvas.getContext('2d');
+    context.font      = "Bold " + fontsize + "px " + fontface;
+    
+    // get size data (height depends only on font size)
+    var metrics       = context.measureText( message );
+    var textWidth     = metrics.width;
+    
+    // background color
+    context.fillStyle = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
+	+ backgroundColor.b + "," + backgroundColor.a + ")";
+    // border color
+    if( borderColor ) {
+	context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + ","
+	    + borderColor.b + "," + borderColor.a + ")";
+	
+	context.lineWidth = borderThickness;
+	roundRect(context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
+	// 1.4 is extra height factor for text below baseline: g,j,p,q.
+    }
+    
+    // text color
+    context.fillStyle = "rgba(" + color.r + "," + color.g + "," + color.b + "," + color.a + ")"; //"rgba(0, 0, 0, 1.0)";
+
+    context.fillText( message, borderThickness, fontsize + borderThickness);
+    
+    // canvas contents will be used for a texture
+    var texture = new THREE.Texture(canvas) 
+    texture.needsUpdate = true;
+
+    var spriteMaterial = new THREE.SpriteMaterial( 
+	{ map: texture, useScreenCoordinates: false } ); //, alignment: spriteAlignment } );
+    var sprite = new THREE.Sprite( spriteMaterial );
+    sprite.scale.set(5,2.5,1); //100,50,1.0);
+    //sprite.metaData = {}; //new IKRS.ObjectMetaData();
+    //sprite.metaData.spriteWidth = textWidth + 2*borderThickness;
+    //console.debug( "spriteWidth=" + sprite.metaData.spriteWidth );
+    return sprite;	
+}
+
+// function for drawing rounded rectangles
+function roundRect(ctx, x, y, w, h, r)  {
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();   
+}

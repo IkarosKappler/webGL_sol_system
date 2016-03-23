@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html> 
+<head> 
+  <title>My Three.js custom texture UV example</title> 
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="description" content="A 3D sol system planet simulation made with WebGL and THREE.js" />
+  <meta name="keywords" content="sol, sonne, sun, system, planets, orbit, webGL, three.js, three, threejs, mercury, venus, earth, mars, jupiter, uranus, neptun, neptune, pluto, moon, 3d" />
+  <meta name="author" content="Ikaros Kappler" />
+  <meta name="date" content="2016-03-09" />
+  <script language="Javascript" type="text/javascript" src="lib/three.r74.min.js"></script>
+  <script language="Javascript" type="text/javascript" src="lib/threejs.examples/js/controls/OrbitControls.js"></script>
+  <script language="Javascript" type="text/javascript" src="js/IKRS.js"></script>
+  <script language="Javascript" type="text/javascript" src="js/IKRS.Object.js"></script>
+  <script language="Javascript" type="text/javascript" src="js/IKRS.VectorFactory.js"></script>
+  <script language="Javascript" type="text/javascript" src="js/IKRS.VectorFactoryXYZ.js"></script>
+  <script language="Javascript" type="text/javascript" src="js/IKRS.AbstractGeometry.js"></script>
+  <script language="Javascript" type="text/javascript" src="js/IKRS.OrbitGeometry.js"></script>
+  <script language="Javascript" type="text/javascript" src="js/IKRS.BoxGeometry.js"></script>
+  <script language="Javascript" type="text/javascript" src="main.js"></script> 
+  <style>
+    #myCanvas { width: 100%; height: 100% }
+  </style> 
+</head>
+
+<body onload="init()"> 
+
+</body> 
+</html>

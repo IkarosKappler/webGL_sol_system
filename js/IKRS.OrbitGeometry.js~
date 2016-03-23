@@ -1,0 +1,18 @@
+/**
+ * An orbit line geometry. Very simple.
+ *
+ * @author  Ikaros Kappler
+ * @date    2016-03-18
+ * @version 1.0.0
+ **/
+
+IKRS = {} | IKRS;
+
+IKRS.OrbitGeometry = function( radius, segments ) {
+
+    
+
+};
+
+IKRS.OrbitGeometry.prototype = Object.create( Object.prototype );
+IKRS.OrbitGeometry.prototype.constructor = IKRS.OrbitGeometry;

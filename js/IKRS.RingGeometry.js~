@@ -1,0 +1,27 @@
+/**
+ * Planetary ring geometry. This is a two-sided disk with simple UV mapping.
+ *
+ * @author  Ikaros Kappler
+ * @date    2016-03-21
+ * @version 1.0.0
+ **/
+
+IKRS.RingGeometry = function( innerRadius, outerRadius, segmentCount ) {
+
+    IKRS.AbstractGeometry.call( this );
+
+    if( !innerRadius )  rinnerRadius = 50;
+    if( !outerRadius )  outerRadius  = 100;
+    if( !segmentCount ) segmentCount = 100;
+
+    var angle = 2 * Math.PI / segmentCount;
+    for (var i = 0; i <= segmentCount; i++) {
+	var x = radius * Math.cos(angle * i);
+	var y = radius * Math.sin(angle * i);
+	this.vertices.push(new THREE.Vector3(x, 0, y));
+    }
+    this.computeLineDistances();
+};
+
+IKRS.RingGeometry.prototype = Object.create( IKRS.AbstractGeometry.prototype );
+IKRS.RingGeometry.prototype.constructor = IKRS.RingGeometry;
